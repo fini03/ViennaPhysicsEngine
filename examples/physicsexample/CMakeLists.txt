@@ -1,44 +1,47 @@
-
-
 add_executable( physicsexample physicsexample.cpp VPEConstraintDemos.cpp VPEConstraintDemos.hpp ${CMAKE_SOURCE_DIR}/include/VPE.hpp)
 
-set( VulkanEngine ${CMAKE_SOURCE_DIR}/../ViennaVulkanEngine )
-
 set_target_properties(physicsexample PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${VulkanEngine}/bin
-            VS_DEBUGGER_WORKING_DIRECTORY ${VulkanEngine}/bin/Debug
-            )
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Release
+    VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/Debug
+)
 
-find_package(Vulkan REQUIRED)
+# Link the VVE
+set( VulkanEngine ${CMAKE_SOURCE_DIR}/../ViennaVulkanEngine )
+include_directories(${VulkanEngine}/VulkanEngine)
 
 target_include_directories(physicsexample PUBLIC
           ${CMAKE_SOURCE_DIR}/include
-          ${Vulkan_INCLUDE_DIRS}
           ${VulkanEngine}/VulkanEngine
-          ${VulkanEngine}/external/Assimp/include
-          ${VulkanEngine}/external/irrKlang/include
-          ${VulkanEngine}/external/glm
           ${VulkanEngine}/external/threadpool
           ${VulkanEngine}/external/stb
           ${VulkanEngine}/external/nuklear
-          ${VulkanEngine}/external/glfw/include
           )
 
-set( AssimpDir ${VulkanEngine}/external/Assimp/lib/x64)
-set( AssimpLibRel ${AssimpDir}/Release/assimp-vc140-mt.lib ${AssimpDir}/Release/IrrXML.lib ${AssimpDir}/Release/zlib.lib )
-set( AssimpLibDeb ${AssimpDir}/Debug/assimp-vc140-mt.lib ${AssimpDir}/Debug/IrrXML.lib ${AssimpDir}/Debug/zlibd.lib )
-add_library(AssimpLib STATIC IMPORTED)
-set_target_properties(AssimpLib PROPERTIES
-       IMPORTED_CONFIGURATIONS "Debug;Release"
-       IMPORTED_LOCATION ${AssimpLibRel}
-       IMPORTED_LOCATION_DEBUG ${AssimpLibDeb}
-       )
+set(IRRKLANG_ROOT ${VulkanEngine}/external/irrKlang)
+find_package(IrrKlang REQUIRED)
+target_include_directories(physicsexample PUBLIC ${IRRKLANG_INCLUDE_DIR})
+target_link_libraries(physicsexample ${IRRKLANG_LIBRARY})
+
+find_package(ZLIB REQUIRED)
+target_link_libraries(physicsexample ZLIB::ZLIB)
+
+find_package(assimp REQUIRED)
+target_include_directories(physicsexample PUBLIC ${assimp_INCLUDE_DIRS})
+target_link_libraries(physicsexample assimp::assimp)
+
+find_package(glm CONFIG REQUIRED)
+target_include_directories(physicsexample PUBLIC ${glm_INCLUDE_DIRS})
+target_link_libraries(physicsexample glm)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_include_directories(physicsexample PUBLIC ${glfw_INCLUDE_DIRS})
+target_link_libraries(physicsexample glfw)
 
 add_library(VulkanEngineLib STATIC IMPORTED)
 set_target_properties(VulkanEngineLib PROPERTIES
              IMPORTED_CONFIGURATIONS "Debug;Release"
-             IMPORTED_LOCATION ${VulkanEngine}/lib/Release/vulkanengine.lib
-             IMPORTED_LOCATION_DEBUG ${VulkanEngine}/lib/Debug/vulkanengine.lib
+             IMPORTED_LOCATION ${VulkanEngine}/lib/libvulkanengine.a
+             IMPORTED_LOCATION_DEBUG ${VulkanEngine}/lib/libvulkanengine.a
              )
 
-target_link_libraries(physicsexample AssimpLib VulkanEngineLib ${VulkanEngine}/external/glfw/lib-vc2022/glfw3.lib)
+target_link_libraries(physicsexample VulkanEngineLib)

@@ -399,20 +399,36 @@ namespace vpe {
 		/// their vectors are multiplied with this factor (1 or -1). 
 		/// </summary>
 		inline static Polytope g_cube {
-			{ { -0.5_real,-0.5_real,-0.5_real }, { -0.5_real,-0.5_real,0.5_real }, { -0.5_real,0.5_real,0.5_real }, { -0.5_real,0.5_real,-0.5_real },
-			{ 0.5_real,-0.5_real,0.5_real }, { 0.5_real,-0.5_real,-0.5_real }, { 0.5_real,0.5_real,-0.5_real }, { 0.5_real,0.5_real,0.5_real } },
-			{ {0,1}, {1,2}, {2,3}, {3,0}, {4,5}, {5,6}, {6,7}, {7,4}, {5,0}, {1,4}, {3,6}, {7,2} }, //edges
-			{	{ {0}, {1}, {2}, {3} },					//face 0
-				{ {4}, {5}, {6}, {7} },					//face 1
-				{ {0,-1}, {8,-1},  {4,-1}, {9,-1} },	//face 2
-				{ {2,-1}, {11,-1}, {6,-1}, {10,-1} },	//face 3
-				{ {3,-1}, {10},    {5,-1}, {8} },		//face 4
-				{ {1,-1}, {9},     {7,-1}, {11} }		//face 5
-			},
-			[&](real mass, glmvec3& s) { //callback for calculating the inertia tensor of this polytope
-				return mass * glmmat3{ {s.y * s.y + s.z * s.z,0,0}, {0,s.x * s.x + s.z * s.z,0}, {0,0,s.x * s.x + s.y * s.y} } / 12.0_real;
-			}
-		};
+            { { -0.5_real,-0.5_real,-0.5_real }, { -0.5_real,-0.5_real,0.5_real }, { -0.5_real,0.5_real,0.5_real }, { -0.5_real,0.5_real,-0.5_real },
+            { 0.5_real,-0.5_real,0.5_real }, { 0.5_real,-0.5_real,-0.5_real }, { 0.5_real,0.5_real,-0.5_real }, { 0.5_real,0.5_real,0.5_real } },
+            { {0,1}, {1,2}, {2,3}, {3,0}, {4,5}, {5,6}, {6,7}, {7,4}, {5,0}, {1,4}, {3,6}, {7,2} }, //edges
+            {   { {0,1.0_real}, {1,1.0_real}, {2,1.0_real}, {3,1.0_real} },                         //face 0
+                { {4,1.0_real}, {5,1.0_real}, {6,1.0_real}, {7,1.0_real} },                         //face 1
+                { {0,-1.0_real}, {8,-1.0_real},  {4,-1.0_real}, {9,-1.0_real} },                    //face 2
+                { {2,-1.0_real}, {11,-1.0_real}, {6,-1.0_real}, {10,-1.0_real} },                   //face 3
+                { {3,-1.0_real}, {10,1.0_real},    {5,-1.0_real}, {8,1.0_real} },                   //face 4
+                { {1,-1.0_real}, {9,1.0_real},     {7,-1.0_real}, {11,1.0_real} }                   //face 5
+            },
+            [](real mass, glmvec3& s) { //callback for calculating the inertia tensor of this polytope
+                return mass * glmmat3{ {s.y * s.y + s.z * s.z,0,0}, {0,s.x * s.x + s.z * s.z,0}, {0,0,s.x * s.x + s.y * s.y} } / 12.0_real;
+            }
+        };
+        
+        //inline static Polytope g_cube {
+		//	{ { -0.5_real,-0.5_real,-0.5_real }, { -0.5_real,-0.5_real,0.5_real }, { -0.5_real,0.5_real,0.5_real }, { -0.5_real,0.5_real,-0.5_real },
+		//	{ 0.5_real,-0.5_real,0.5_real }, { 0.5_real,-0.5_real,-0.5_real }, { 0.5_real,0.5_real,-0.5_real }, { 0.5_real,0.5_real,0.5_real } },
+		//	{ {0,1}, {1,2}, {2,3}, {3,0}, {4,5}, {5,6}, {6,7}, {7,4}, {5,0}, {1,4}, {3,6}, {7,2} }, //edges
+		//	{	{ {0}, {1}, {2}, {3} },					//face 0
+		//		{ {4}, {5}, {6}, {7} },					//face 1
+		//		{ {0,-1}, {8,-1},  {4,-1}, {9,-1} },	//face 2
+		//		{ {2,-1}, {11,-1}, {6,-1}, {10,-1} },	//face 3
+		//		{ {3,-1}, {10},    {5,-1}, {8} },		//face 4
+		//		{ {1,-1}, {9},     {7,-1}, {11} }		//face 5
+		//	},
+		//	[](real mass, glmvec3& s) { //callback for calculating the inertia tensor of this polytope
+		//		return mass * glmmat3{ {s.y * s.y + s.z * s.z,0,0}, {0,s.x * s.x + s.z * s.z,0}, {0,0,s.x * s.x + s.y * s.y} } / 12.0_real;
+		//	}
+		//};
 
 		//--------------------------------------------------------------------------------------------------
 		//Physics engine stuff
@@ -656,7 +672,8 @@ namespace vpe {
 			/// <returns>Pointer to supporting vertex of body.</returns>
 			Vertex* support(glmvec3 dirL) {
 				auto compare = [&](auto& a, auto& b) { return glm::dot(dirL, a.m_positionL) < glm::dot(dirL, b.m_positionL); };
-				return std::ranges::max_element(m_polytope->m_vertices, compare)._Ptr;
+				return std::addressof(*std::ranges::max_element(m_polytope->m_vertices, compare));
+                //return std::ranges::max_element(m_polytope->m_vertices, compare)._Ptr;
 			};
 		};
 
