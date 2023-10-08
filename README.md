@@ -39,6 +39,27 @@ For Windows 11, all non-Vulkan dependencies are in the external directory. The V
 
 The project will be updated regularly, so it makes sense to pull the newest version regularly.
 
+# Set up for Linux
+
+The engine has been tested on archlinux with wayland and the Intel driver. First set up the [Vienna Vulkan Engine](https://github.com/fini03/ViennaVulkanEngine) like in the README section. Then the following:
+- Cd into Vienna Physics Engine and create a build folder and run CMake there
+- Run make
+- Go back to the root folder and cd into `bin/Release` where the binary is located
+- Execute the binary
+
+List of commands:
+```
+cd ViennaPhysicsEngine
+mkdir build
+cd build
+cmake ..
+make
+cd ..
+cd bin/Release
+./physicsexample
+```
+To make this work some code modifications were needed. The affected files were `examples/physicsexample/physicsexample.cpp` and `include/VPE.hpp`. The diff for the physicsexample are [here](https://github.com/fini03/ViennaPhysicsEngine/commit/f63f55194f38cdf2dfba4467dae2371fcbf72f02#diff-4397f8ee9d2895cebf5705d60b8f7eefe8dc01457e0b2afbad18acd86aa9c2f6) and for the `VPE.hpp` [here](https://github.com/fini03/ViennaPhysicsEngine/commit/f63f55194f38cdf2dfba4467dae2371fcbf72f02#diff-aac838f0d2baf4dcb6f23d4c37ad2a2b73b4c64d3e31672c81d2af4a7a6a0482).
+
 # Using VPE
 
 You can use VPE without the VVE, just include VPE.hpp into your project, its 100% C++20 and does not depend on any external library.
